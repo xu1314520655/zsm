@@ -1,57 +1,120 @@
-# React + TypeScript + Vite
+# 数据分析在线教育平台
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一款基于React + TypeScript + TailwindCSS开发的数据分析在线教育平台，专为商务数据分析与应用专业学生设计。
 
-Currently, two official plugins are available:
+## ✨ 核心功能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. 完整的课程体系
+- **5门专业课程**：Python数据分析基础、商业数据可视化、统计分析与应用、机器学习入门、数据分析实战项目
+- **系统化学习路径**：每个课程包含多个章节、课时和练习题
+- **精美的课程展示**：课程卡片、详情页面、进度追踪
 
-## Expanding the ESLint configuration
+### 2. 互动式学习模块
+- **学习内容**：分章节学习界面，支持课时导航
+- **在线练习**：交互式选择题，即时反馈和答案解析
+- **测评考试**：综合测试，成绩报告和答题回顾
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. 成就激励系统
+- **5个成就徽章**：初学者、练习达人、测评高手、课程完成者、全栈分析师
+- **学习积分系统**：完成任务获得积分奖励
+- **积分排行榜**：查看学习排名
+- **徽章墙**：展示所有获得的成就
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 4. 个人中心
+- **学习进度统计**：整体学习情况概览
+- **课程进度追踪**：每门课程的详细进度
+- **历史测评记录**：查看过往测评成绩
+- **最近获得的成就**：展示最新解锁的徽章
+
+## 🎨 设计特色
+
+- **现代美观界面**：采用蓝色/紫色渐变主题，专业科技感
+- **响应式设计**：完美适配桌面、平板和移动端
+- **流畅动画**：悬停效果、渐入动画、进度条动画
+- **数据持久化**：使用LocalStorage保存学习进度
+
+## 🛠 技术栈
+
+- **前端**：React 18 + TypeScript + TailwindCSS 3 + Vite
+- **状态管理**：Zustand
+- **路由**：React Router DOM
+- **图标**：Lucide React
+- **构建**：Vite
+
+## 📦 快速开始
+
+### 安装依赖
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  extends: [
-    // other configs...
-    // Enable lint rules for React
-    reactX.configs['recommended-typescript'],
-    // Enable lint rules for React DOM
-    reactDom.configs.recommended,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 开发模式
+```bash
+npm run dev
 ```
+访问 http://localhost:5173
+
+### 构建生产版本
+```bash
+npm run build
+```
+
+### 类型检查
+```bash
+npm run check
+```
+
+## 🚀 部署到Cloudflare Pages
+
+### 步骤1：推送代码到GitHub
+1. 克隆本仓库
+2. 推送代码到你的GitHub仓库
+
+### 步骤2：在Cloudflare Pages中部署
+1. 登录Cloudflare Pages
+2. 连接你的GitHub仓库
+3. 配置构建设置：
+   - 构建命令：`npm run build`
+   - 输出目录：`dist`
+4. 点击部署
+
+## 📁 项目结构
+
+```
+/src
+├── components/       # 核心组件
+├── pages/            # 所有页面
+├── hooks/            # Zustand状态管理
+├── utils/            # 数据和工具
+└── types.ts          # TypeScript类型定义
+```
+
+## 🎯 课程列表
+
+1. **Python数据分析基础** - 从零开始学习Python编程，掌握NumPy、Pandas等核心数据分析库
+2. **商业数据可视化** - 使用Matplotlib和Seaborn创建专业的商业数据可视化图表
+3. **统计分析与应用** - 学习描述统计、推论统计、假设检验等核心统计知识
+4. **机器学习入门** - 了解机器学习基本概念，学习scikit-learn进行预测建模
+5. **数据分析实战项目** - 通过真实商业案例，综合运用所学知识完成数据分析项目
+
+## 🏆 成就系统
+
+- **初学者** - 完成第一个课程章节
+- **练习达人** - 完成10道练习题
+- **测评高手** - 首次通过课程测评
+- **课程完成者** - 完成一门完整课程
+- **全栈分析师** - 完成所有课程
+
+## 📝 注意事项
+
+- 本项目使用LocalStorage存储学习进度，清除浏览器缓存会导致数据丢失
+- 推荐使用Chrome、Firefox、Edge等现代浏览器访问
+- 首次访问时会自动创建默认用户数据
+
+## 🤝 贡献
+
+欢迎提交Issue和Pull Request来改进这个项目！
+
+## 📄 许可证
+
+MIT License

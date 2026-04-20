@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, GraduationCap, Trophy, User, Home } from 'lucide-react';
+import { BookOpen, GraduationCap, Trophy, User, Home, Code } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 
 const Navbar = () => {
@@ -47,6 +47,18 @@ const Navbar = () => {
             >
               <BookOpen className="w-5 h-5" />
               <span className="hidden sm:inline">课程</span>
+            </Link>
+
+            <Link
+              to="/projects"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                isActive('/projects')
+                  ? 'bg-blue-700 text-white shadow-md'
+                  : 'text-blue-100 hover:bg-blue-700/50'
+              }`}
+            >
+              <Code className="w-5 h-5" />
+              <span className="hidden sm:inline">项目</span>
             </Link>
 
             <Link

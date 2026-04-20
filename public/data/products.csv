@@ -1,0 +1,9 @@
+category,product_name,price,product_id
+电子产品,手机,2999,PROD_0000
+电子产品,电脑,5999,PROD_0001
+服装,T恤,99,PROD_0002
+服装,牛仔裤,299,PROD_0003
+食品,零食,29,PROD_0004
+食品,饮料,9,PROD_0005
+家居,床上用品,199,PROD_0006
+家居,厨房用品,149,PROD_0007

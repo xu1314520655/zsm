@@ -22,28 +22,11 @@ const Projects = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const runCode = async (code: string) => {
+  const runCode = async (code: string, output: string, error: string) => {
     setIsLoading(true);
-    setOutput('');
-    setError('');
-
-    try {
-      const response = await fetch('http://localhost:5000/api/run-python', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
-      });
-
-      const result = await response.json();
-      setOutput(result.output);
-      setError(result.error);
-    } catch (err) {
-      setError('在Cloudflare Pages部署环境中无法运行Python代码。\n\n替代方案：\n1. 本地运行：克隆仓库并启动本地后端服务\n2. 下载数据：下载数据文件到本地使用Python环境运行\n3. 使用在线IDE：复制代码到Google Colab或Jupyter Notebook运行');
-    } finally {
-      setIsLoading(false);
-    }
+    setOutput(output);
+    setError(error);
+    setIsLoading(false);
   };
 
   const projects: Project[] = [

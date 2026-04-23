@@ -63,16 +63,24 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCod
       // 重定向标准输出
       pyodide.setStdout((text: string) => {
         outputRef.current += text;
+        console.log('Python stdout:', text);
       });
       pyodide.setStderr((text: string) => {
         errorRef.current += text;
+        console.error('Python stderr:', text);
       });
 
       // 执行代码
+      console.log('开始执行Python代码...');
       await pyodide.runPythonAsync(code);
+      console.log('Python代码执行完成');
     } catch (err: any) {
-      errorRef.current += err.toString();
+      const errorMessage = err.toString();
+      errorRef.current += errorMessage;
+      console.error('Python执行错误:', errorMessage);
     } finally {
+      console.log('输出:', outputRef.current);
+      console.log('错误:', errorRef.current);
       onRunCode(code, outputRef.current, errorRef.current);
     }
   };

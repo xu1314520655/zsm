@@ -40,7 +40,7 @@ const Projects = () => {
       setOutput(result.output);
       setError(result.error);
     } catch (err) {
-      setError('执行代码时发生错误，请检查后端服务是否运行');
+      setError('在Cloudflare Pages部署环境中无法运行Python代码。\n\n替代方案：\n1. 本地运行：克隆仓库并启动本地后端服务\n2. 下载数据：下载数据文件到本地使用Python环境运行\n3. 使用在线IDE：复制代码到Google Colab或Jupyter Notebook运行');
     } finally {
       setIsLoading(false);
     }

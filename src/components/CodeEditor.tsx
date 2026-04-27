@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 
-// @ts-ignore - Pyodide类型定义暂时忽略
-import * as Pyodide from 'pyodide';
-
 interface CodeEditorProps {
   initialCode: string;
   language: string;
@@ -12,33 +9,53 @@ interface CodeEditorProps {
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCode }) => {
   const [code, setCode] = useState(initialCode);
-  const [pyodide, setPyodide] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pyodideLoaded, setPyodideLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
   const outputRef = useRef<string>('');
   const errorRef = useRef<string>('');
+  const pyodideRef = useRef<any>(null);
 
   // 初始化Pyodide
   useEffect(() => {
     const loadPyodide = async () => {
       try {
-        const pyodideInstance = await Pyodide.loadPyodide({
+        setIsLoading(true);
+        setLoadError(null);
+        
+        // 动态加载Pyodide
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js';
+        script.type = 'text/javascript';
+        
+        await new Promise<void>((resolve, reject) => {
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('加载Pyodide脚本失败'));
+          document.body.appendChild(script);
+        });
+
+        // @ts-ignore - 全局Pyodide对象
+        const pyodide = await (window as any).loadPyodide({
           indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
         });
         
-        // 安装pandas和numpy
-        await pyodideInstance.loadPackage(['pandas', 'numpy', 'micropip']);
-        await pyodideInstance.runPythonAsync(`
+        // 安装必要的包
+        await pyodide.loadPackage(['pandas', 'numpy', 'micropip']);
+        await pyodide.runPythonAsync(`
           import micropip
           await micropip.install('scikit-learn')
         `);
         
         // 定义data_dir变量
-        pyodideInstance.globals.set('data_dir', 'https://raw.githubusercontent.com/xu1314520655/zsm/master/public/data/');
+        pyodide.globals.set('data_dir', 'https://raw.githubusercontent.com/xu1314520655/zsm/master/public/data/');
         
-        setPyodide(pyodideInstance);
-        setIsLoading(false);
-      } catch (err) {
+        pyodideRef.current = pyodide;
+        setPyodideLoaded(true);
+      } catch (err: any) {
         console.error('加载Pyodide失败:', err);
+        setLoadError(`加载Python环境失败: ${err.message}`);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -46,20 +63,30 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCod
     loadPyodide();
 
     return () => {
-      if (pyodide) {
-        pyodide.destroy();
+      if (pyodideRef.current) {
+        try {
+          pyodideRef.current.destroy();
+        } catch (e) {
+          console.error('销毁Pyodide失败:', e);
+        }
       }
     };
   }, []);
 
   // 运行代码
   const runCode = async () => {
-    if (!pyodide) return;
+    if (!pyodideRef.current) {
+      onRunCode(code, '', 'Python环境未加载，请刷新页面重试');
+      return;
+    }
 
+    setIsRunning(true);
     outputRef.current = '';
     errorRef.current = '';
 
     try {
+      const pyodide = pyodideRef.current;
+      
       // 重定向标准输出
       pyodide.setStdout((text: string) => {
         outputRef.current += text;
@@ -76,12 +103,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCod
       console.log('Python代码执行完成');
     } catch (err: any) {
       const errorMessage = err.toString();
-      errorRef.current += errorMessage;
+      errorRef.current += `执行错误: ${errorMessage}`;
       console.error('Python执行错误:', errorMessage);
     } finally {
       console.log('输出:', outputRef.current);
       console.log('错误:', errorRef.current);
       onRunCode(code, outputRef.current, errorRef.current);
+      setIsRunning(false);
     }
   };
 
@@ -91,10 +119,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCod
         <h3 className="text-lg font-semibold text-gray-900">代码编辑器</h3>
         <button
           onClick={runCode}
-          disabled={isLoading}
+          disabled={isLoading || !pyodideLoaded || isRunning}
           className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? '加载中...' : '运行代码'}
+          {isLoading ? '加载中...' : isRunning ? '执行中...' : '运行代码'}
         </button>
       </div>
       <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
@@ -115,6 +143,16 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode, language, onRunCod
       {isLoading && (
         <div className="mt-2 text-sm text-gray-500">
           正在加载Python环境，请稍候...
+        </div>
+      )}
+      {loadError && (
+        <div className="mt-2 text-sm text-red-600">
+          {loadError}
+        </div>
+      )}
+      {pyodideLoaded && !isLoading && (
+        <div className="mt-2 text-sm text-green-600">
+          Python环境加载成功，可以运行代码
         </div>
       )}
     </div>

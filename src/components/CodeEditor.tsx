@@ -341,27 +341,33 @@ def load_reviews():
     try {
       const pyodide = pyodideRef.current;
       
-      pyodide.setStdout((text: string) => {
+      const oldStdout = pyodide.setStdout((text: string) => {
         outputRef.current += text;
         console.log('Python stdout:', text);
       });
-      pyodide.setStderr((text: string) => {
+      const oldStderr = pyodide.setStderr((text: string) => {
         errorRef.current += text;
         console.error('Python stderr:', text);
       });
 
       console.log('开始执行Python代码...');
-      console.log('代码长度:', code.length);
+      console.log('代码内容:', code);
       
       await pyodide.runPythonAsync(code);
       console.log('Python代码执行完成');
+      
+      pyodide.setStdout(oldStdout);
+      pyodide.setStderr(oldStderr);
     } catch (err: any) {
       const errorMessage = err.toString();
       errorRef.current += `执行错误: ${errorMessage}`;
       console.error('Python执行错误:', errorMessage);
     } finally {
-      console.log('输出:', outputRef.current);
-      console.log('错误:', errorRef.current);
+      console.log('最终输出:', outputRef.current);
+      console.log('最终错误:', errorRef.current);
+      if (!outputRef.current && !errorRef.current) {
+        outputRef.current = '代码执行完成，但没有输出结果。请检查代码中是否有print语句。';
+      }
       onRunCode(code, outputRef.current, errorRef.current);
       setIsRunning(false);
     }

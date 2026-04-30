@@ -341,30 +341,53 @@ def load_reviews():
     try {
       const pyodide = pyodideRef.current;
       
-      const oldStdout = pyodide.setStdout((text: string) => {
-        outputRef.current += text;
-        console.log('Python stdout:', text);
-      });
-      const oldStderr = pyodide.setStderr((text: string) => {
-        errorRef.current += text;
-        console.error('Python stderr:', text);
-      });
+      const captureCode = `
+import io
+import sys
 
+# 捕获标准输出
+old_stdout = sys.stdout
+old_stderr = sys.stderr
+
+stdout_capture = io.StringIO()
+stderr_capture = io.StringIO()
+
+sys.stdout = stdout_capture
+sys.stderr = stderr_capture
+
+try:
+${code.split('\n').map(line => '    ' + line).join('\n')}
+finally:
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
+
+_stdout_result = stdout_capture.getvalue()
+_stderr_result = stderr_capture.getvalue()
+`;
+      
       console.log('开始执行Python代码...');
-      console.log('代码内容:', code);
       
-      await pyodide.runPythonAsync(code);
+      await pyodide.runPythonAsync(captureCode);
+      
+      const stdoutResult = pyodide.globals.get('_stdout_result');
+      const stderrResult = pyodide.globals.get('_stderr_result');
+      
+      if (stdoutResult) {
+        outputRef.current = stdoutResult.toString();
+      }
+      if (stderrResult) {
+        errorRef.current = stderrResult.toString();
+      }
+      
       console.log('Python代码执行完成');
+      console.log('stdout:', outputRef.current);
+      console.log('stderr:', errorRef.current);
       
-      pyodide.setStdout(oldStdout);
-      pyodide.setStderr(oldStderr);
     } catch (err: any) {
       const errorMessage = err.toString();
       errorRef.current += `执行错误: ${errorMessage}`;
       console.error('Python执行错误:', errorMessage);
     } finally {
-      console.log('最终输出:', outputRef.current);
-      console.log('最终错误:', errorRef.current);
       if (!outputRef.current && !errorRef.current) {
         outputRef.current = '代码执行完成，但没有输出结果。请检查代码中是否有print语句。';
       }

@@ -48,51 +48,7 @@ const Projects = () => {
       dataFile: 'orders.csv',
       icon: <Database className="w-8 h-8" />,
       level: 'beginner',
-      defaultCode: `# 加载数据
-import pandas as pd
-import numpy as np
-
-# 读取数据文件
-df = pd.read_csv(data_dir + 'orders.csv')
-
-# 查看数据基本信息
-print("数据基本信息：")
-print(df.info())
-
-print("\n数据前5行：")
-print(df.head())
-
-# 检查缺失值
-print("\n缺失值情况：")
-print(df.isna().sum())
-
-# 检查重复值
-print("\n重复值数量：")
-print(df.duplicated().sum())
-
-# 数据类型转换
-df['order_date'] = pd.to_datetime(df['order_date'])
-
-# 异常值检测（IQR规则）
-Q1 = df['amount'].quantile(0.25)
-Q3 = df['amount'].quantile(0.75)
-IQR = Q3 - Q1
-lower_bound = Q1 - 1.5 * IQR
-upper_bound = Q3 + 1.5 * IQR
-
-outliers = df[(df['amount'] < lower_bound) | (df['amount'] > upper_bound)]
-print(f"\n异常值数量：{len(outliers)}")
-print("异常值详情：")
-print(outliers)
-
-# 数据清洗
-cleaned_df = df.dropna()
-cleaned_df = cleaned_df.drop_duplicates()
-cleaned_df = cleaned_df[(cleaned_df['amount'] >= lower_bound) & (cleaned_df['amount'] <= upper_bound)]
-
-print("\n清洗后数据形状：", cleaned_df.shape)
-print("清洗后数据基本信息：")
-print(cleaned_df.info())`
+      defaultCode: '# Test basic Python\nimport pandas as pd\nimport numpy as np\n\nprint(\"Hello from Python!\")\nprint(\"Testing basic operations...\")\n\n# Read data\ndf = pd.read_csv(data_dir + \"orders.csv\")\nprint(\"Data shape:\", df.shape)\nprint(\"\\\\nFirst 3 rows:\")\nprint(df.head(3))'
     },
     {
       id: 2,
@@ -110,60 +66,7 @@ print(cleaned_df.info())`
       dataFile: 'user_logs.csv',
       icon: <FileText className="w-8 h-8" />,
       level: 'beginner',
-      defaultCode: `# 用户行为日志分析
-import pandas as pd
-import numpy as np
-
-# 读取数据文件
-df = pd.read_csv(data_dir + 'user_logs.csv')
-
-# 查看数据基本信息
-print("数据基本信息：")
-print(df.info())
-
-print("\n数据前5行：")
-print(df.head())
-
-# 时间序列处理
-df['timestamp'] = pd.to_datetime(df['timestamp'])
-df['hour'] = df['timestamp'].dt.hour
-df['day_of_week'] = df['timestamp'].dt.dayofweek
-df['is_weekend'] = df['day_of_week'].apply(lambda x: 1 if x >= 5 else 0)
-df['is_late_night'] = df['hour'].apply(lambda x: 1 if x >= 22 or x <= 5 else 0)
-
-# 字符串解析：从URL提取页面类型
-df['page_type'] = df['url'].str.extract(r'/([^/]+)/', expand=False).fillna('unknown')
-
-# 会话划分（按用户ID + 30分钟无操作切分）
-df = df.sort_values(['user_id', 'timestamp'])
-df['time_diff'] = df.groupby('user_id')['timestamp'].diff().dt.total_seconds() / 60
-df['session_id'] = (df['time_diff'] > 30).cumsum()
-df['session_id'] = df['user_id'].astype(str) + '_' + df['session_id'].astype(str)
-
-# 计算会话时长
-session_duration = df.groupby('session_id')['timestamp'].agg(['min', 'max'])
-session_duration['duration_minutes'] = (session_duration['max'] - session_duration['min']).dt.total_seconds() / 60
-
-# 构建用户特征表
-user_features = df.groupby('user_id').agg(
-    total_visits=('user_id', 'count'),
-    unique_pages=('page_type', 'nunique'),
-    late_night_visits=('is_late_night', 'sum'),
-    weekend_visits=('is_weekend', 'sum'),
-    avg_session_duration=('session_id', lambda x: session_duration.loc[x.unique(), 'duration_minutes'].mean()),
-    purchase_page_visits=('page_type', lambda x: (x == 'purchase').sum()),
-    product_page_visits=('page_type', lambda x: (x == 'product').sum())
-).reset_index()
-
-# 计算关键页面访问比例
-user_features['purchase_page_ratio'] = user_features['purchase_page_visits'] / user_features['total_visits']
-user_features['product_page_ratio'] = user_features['product_page_visits'] / user_features['total_visits']
-
-print("\n用户特征表：")
-print(user_features.head())
-
-print("\n特征表基本信息：")
-print(user_features.info())`
+      defaultCode: '# User Behavior Log Analysis\nimport pandas as pd\nimport numpy as np\n\n# Read data file\ndf = pd.read_csv(data_dir + \"user_logs.csv\")\n\n# Basic info\nprint(\"Data info:\")\nprint(df.info())\n\nprint(\"\\\\nFirst 5 rows:\")\nprint(df.head())\n\n# Time series processing\ndf[\"timestamp\"] = pd.to_datetime(df[\"timestamp\"])\ndf[\"hour\"] = df[\"timestamp\"].dt.hour\ndf[\"day_of_week\"] = df[\"timestamp\"].dt.dayofweek\ndf[\"is_weekend\"] = df[\"day_of_week\"].apply(lambda x: 1 if x >= 5 else 0)\ndf[\"is_late_night\"] = df[\"hour\"].apply(lambda x: 1 if x >= 22 or x <= 5 else 0)\n\n# URL parsing\ndf[\"page_type\"] = df[\"url\"].str.extract(r\"/([^/]+)/\", expand=False).fillna(\"unknown\")\n\n# Session segmentation\ndf = df.sort_values([\"user_id\", \"timestamp\"])\ndf[\"time_diff\"] = df.groupby(\"user_id\")[\"timestamp\"].diff().dt.total_seconds() / 60\ndf[\"session_id\"] = (df[\"time_diff\"] > 30).cumsum()\ndf[\"session_id\"] = df[\"user_id\"].astype(str) + \"_\" + df[\"session_id\"].astype(str)\n\nprint(\"\\\\nSession analysis:\")\nprint(df[[\"user_id\", \"session_id\", \"timestamp\"]].head())'
     },
     {
       id: 3,

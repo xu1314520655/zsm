@@ -42,7 +42,7 @@ const Projects = () => {
 
   const handleResetCode = () => {
     if (selectedProject) {
-      setCurrentCode(selectedProject.defaultCode);
+      setCurrentCode('');  // 重置为空
       setShowAnswer(false);
     }
   };
@@ -66,7 +66,7 @@ const Projects = () => {
       dataFile: 'orders.csv',
       icon: <Database className="w-8 h-8" />,
       level: 'beginner',
-      defaultCode: '# 电商订单数据清洗\nimport pandas as pd\nimport numpy as np\n\ndf = load_orders()\nprint(\"数据加载成功！\")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 电商订单数据清洗 - 完整答案\nimport pandas as pd\nimport numpy as np\n\ndf = load_orders()\nprint(\"=== 清洗前数据质量报告 ===\")\nprint(f\"总行数: {len(df)}\")\nprint(f\"缺失值:\")\nprint(df.isna().sum())\nprint(f\"重复值: {df.duplicated().sum()}\")\n\ndf[\"order_date\"] = pd.to_datetime(df[\"order_date\"])\nQ1 = df[\"amount\"].quantile(0.25)\nQ3 = df[\"amount\"].quantile(0.75)\nIQR = Q3 - Q1\nlower = Q1 - 1.5 * IQR\nupper = Q3 + 1.5 * IQR\n\noutliers = df[(df[\"amount\"] < lower) | (df[\"amount\"] > upper)]\nprint(f\"\\n异常值数量: {len(outliers)}\")\n\ncleaned_df = df.dropna().drop_duplicates()\ncleaned_df = cleaned_df[(cleaned_df[\"amount\"] >= lower) & (cleaned_df[\"amount\"] <= upper)]\n\nprint(\"\\n=== 清洗后数据质量报告 ===\")\nprint(f\"总行数: {len(cleaned_df)}\")',
       answerExplanation: '**解题思路：**\n\n1. **数据加载**：使用 load_orders() 函数加载订单数据\n2. **数据探查**：使用 info()、head() 查看数据结构\n3. **缺失值处理**：使用 dropna() 删除缺失值\n4. **重复值处理**：使用 drop_duplicates() 删除重复记录\n5. **异常值检测**：使用IQR方法识别异常值\n6. **数据清洗**：综合应用以上方法完成清洗\n\n**关键要点：**\n- isna().sum() 用于统计缺失值\n- duplicated().sum() 用于统计重复值\n- IQR = Q3 - Q1，异常值范围：[Q1-1.5IQR, Q3+1.5IQR]\n- 清洗顺序：先处理缺失值，再处理重复值，最后处理异常值'
     },
@@ -86,7 +86,7 @@ const Projects = () => {
       dataFile: 'user_logs.csv',
       icon: <FileText className="w-8 h-8" />,
       level: 'beginner',
-      defaultCode: '# 用户行为日志分析\nimport pandas as pd\nimport numpy as np\n\ndf = load_user_logs()\nprint(\"数据加载成功！\")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 用户行为日志解析与特征工程\nimport pandas as pd\nimport numpy as np\n\ndf = load_user_logs()\ndf[\"timestamp\"] = pd.to_datetime(df[\"timestamp\"])\ndf[\"hour\"] = df[\"timestamp\"].dt.hour\ndf[\"is_late_night\"] = df[\"hour\"].apply(lambda x: 1 if x >= 22 or x <= 5 else 0)\ndf[\"page_type\"] = df[\"url\"].str.extract(r\"/([^/]+)/\", expand=False).fillna(\"unknown\")\nprint(\"=== 处理后数据 ===\")\nprint(df.head())',
       answerExplanation: '**解题思路：**\n\n1. **时间特征提取**：从timestamp中提取小时、星期、是否周末、是否深夜\n2. **URL解析**：使用正则表达式从URL中提取页面类型\n3. **会话划分**：按用户分组，计算相邻访问时间差，超过30分钟切分新会话\n4. **特征聚合**：统计每个用户的访问次数、深夜访问次数、周末访问次数、平均会话时长\n\n**关键要点：**\n- dt.hour, dt.dayofweek 用于提取时间特征\n- str.extract() 用于正则表达式提取\n- groupby().diff() 用于计算组内差值\n- cumsum() 用于累积计数，生成会话ID'
     },
@@ -107,7 +107,7 @@ const Projects = () => {
       dataFile: 'transactions.csv',
       icon: <BarChart3 className="w-8 h-8" />,
       level: 'intermediate',
-      defaultCode: '# 购物车分析\nimport pandas as pd\nimport numpy as np\n\n# 加载交易数据\ndf = load_transactions()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\nprint(\"\\n=== 数据前5行 ===\")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 购物车分析 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载交易数据\ndf = load_transactions()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\nprint(\"\\n=== 数据前5行 ===\")\nprint(df.head())\n\n# 输出每个订单对应的商品列表\norder_products = df.groupby(\"order_id\")[\"product_name\"].agg(list).reset_index()\norder_products[\"product_list\"] = order_products[\"product_name\"].apply(lambda x: \", \".join(x))\nprint(\"\\n=== 每个订单对应的商品列表 ===\")\nprint(order_products[[\"order_id\", \"product_list\"]])\n\n# 生成二元矩阵（0/1矩阵）\nbinary_matrix = pd.crosstab(df[\"order_id\"], df[\"product_name\"])\nbinary_matrix = binary_matrix.applymap(lambda x: 1 if x > 0 else 0)\nprint(\"\\n=== 二元矩阵 ===\")\nprint(f\"矩阵形状: {binary_matrix.shape}\")\nprint(binary_matrix)\n\n# 计算单项商品支持度\nsupport = binary_matrix.mean()\nprint(\"\\n=== 单项商品支持度 ===\")\nprint(support.sort_values(ascending=False))\n\n# 筛选支持度>0.1的商品\nhigh_support_products = support[support > 0.1]\nprint(f\"\\n支持度>0.1的商品数量: {len(high_support_products)}\")\nprint(\"支持度>0.1的商品:\")\nprint(high_support_products.sort_values(ascending=False))',
       answerExplanation: '**解题思路：**\n\n1. **数据加载**：使用 load_transactions() 加载交易数据\n2. **商品列表聚合**：按订单分组，将每个订单的商品聚合为列表\n3. **二元矩阵构建**：使用 crosstab 构建订单×商品的0/1矩阵\n4. **支持度计算**：计算每个商品在订单中出现的比例\n5. **筛选高频商品**：筛选支持度高于阈值的商品\n\n**关键要点：**\n- groupby().agg(list) 用于聚合每个组的列表\n- crosstab() 用于构建交叉表\n- applymap() 用于逐元素转换\n- mean() 在二元矩阵上计算的就是支持度'
     },
@@ -127,7 +127,7 @@ const Projects = () => {
       dataFile: 'customer_transactions.csv',
       icon: <Brain className="w-8 h-8" />,
       level: 'intermediate',
-      defaultCode: '# RFM客户价值分群\nimport pandas as pd\nimport numpy as np\n\n# 加载客户交易数据\ndf = load_customer_transactions()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\nprint(\"\\n=== 数据前5行 ===\")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# RFM客户价值分群 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载客户交易数据\ndf = load_customer_transactions()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\n# 数据预处理\ndf[\"transaction_date\"] = pd.to_datetime(df[\"transaction_date\"])\n\n# 计算RFM值\ncurrent_date = df[\"transaction_date\"].max() + pd.Timedelta(days=1)\n\nrfm = df.groupby(\"customer_id\").agg({\n    \"transaction_date\": lambda x: (current_date - x.max()).days,\n    \"transaction_id\": \"count\",\n    \"amount\": \"sum\"\n}).rename(columns={\n    \"transaction_date\": \"Recency\",\n    \"transaction_id\": \"Frequency\",\n    \"amount\": \"Monetary\"\n}).reset_index()\n\nprint(\"\\n=== RFM数据 ===\")\nprint(rfm)\n\n# RFM评分（1-5分）\nrfm[\"R_score\"] = pd.cut(rfm[\"Recency\"], 5, labels=[5, 4, 3, 2, 1])\nrfm[\"F_score\"] = pd.cut(rfm[\"Frequency\"], 5, labels=[1, 2, 3, 4, 5])\nrfm[\"M_score\"] = pd.cut(rfm[\"Monetary\"], 5, labels=[1, 2, 3, 4, 5])\n\nrfm[\"R_score\"] = rfm[\"R_score\"].astype(int)\nrfm[\"F_score\"] = rfm[\"F_score\"].astype(int)\nrfm[\"M_score\"] = rfm[\"M_score\"].astype(int)\n\n# 客户分群\ndef customer_segment(row):\n    r, f, m = row[\"R_score\"], row[\"F_score\"], row[\"M_score\"]\n    if r >= 4 and f >= 4 and m >= 4:\n        return \"重要价值客户\"\n    elif r >= 4 and f < 4 and m >= 4:\n        return \"重要发展客户\"\n    elif r < 4 and f >= 4 and m >= 4:\n        return \"重要保持客户\"\n    elif r < 4 and f < 4 and m >= 4:\n        return \"重要挽留客户\"\n    elif r >= 4 and f >= 4 and m < 4:\n        return \"一般价值客户\"\n    elif r >= 4 and f < 4 and m < 4:\n        return \"一般发展客户\"\n    elif r < 4 and f >= 4 and m < 4:\n        return \"一般保持客户\"\n    else:\n        return \"一般挽留客户\"\n\nrfm[\"segment\"] = rfm.apply(customer_segment, axis=1)\n\n# 分析分群结果\nsegment_analysis = rfm.groupby(\"segment\").agg(\n    count=(\"customer_id\", \"count\"),\n    total_amount=(\"Monetary\", \"sum\"),\n    avg_recency=(\"Recency\", \"mean\"),\n    avg_frequency=(\"Frequency\", \"mean\"),\n    avg_monetary=(\"Monetary\", \"mean\")\n).reset_index()\n\nprint(\"\\n=== 客户分群分析 ===\")\nprint(segment_analysis)',
       answerExplanation: '**解题思路：**\n\n1. **RFM计算**：\n   - Recency：最近一次购买距离当前的天数\n   - Frequency：购买频次\n   - Monetary：购买总金额\n\n2. **评分转换**：使用pd.cut()将RFM值转换为1-5分\n   - R值：越小越好，所以标签反转[5,4,3,2,1]\n   - F值和M值：越大越好，标签[1,2,3,4,5]\n\n3. **客户分群**：根据RFM评分组合将客户分为8类\n   - 重要价值客户：高R高F高M\n   - 重要发展客户：高R低F高M\n   - 重要保持客户：低R高F高M\n   - 重要挽留客户：低R低F高M\n   - 其他四类为一般客户\n\n**关键要点：**\n- groupby().agg() 用于同时计算多个聚合指标\n- pd.cut() 用于区间划分\n- apply() 配合自定义函数实现复杂逻辑'
     },
@@ -149,7 +149,7 @@ const Projects = () => {
       dataFile: 'sales_data.csv',
       icon: <BarChart3 className="w-8 h-8" />,
       level: 'intermediate',
-      defaultCode: '# 时间序列分析\nimport pandas as pd\nimport numpy as np\n\n# 加载销售数据\ndf = load_sales_data()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\nprint(\"\\n=== 数据前5行 ===\")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 时间序列分析 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载销售数据\ndf = load_sales_data()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\n# 数据预处理\ndf[\"date\"] = pd.to_datetime(df[\"date\"])\ndf.set_index(\"date\", inplace=True)\n\n# 重采样：周趋势\nweekly_sales = df[\"sales\"].resample(\"W\").sum()\nprint(\"\\n=== 周销售趋势 ===\")\nprint(weekly_sales)\n\n# 滑动窗口：7日移动平均\ndf[\"7day_ma\"] = df[\"sales\"].rolling(window=7).mean()\nprint(\"\\n=== 7日移动平均 ===\")\nprint(df[[\"sales\", \"7day_ma\"]].head(10))\n\n# 环比计算\ndf[\"month_over_month\"] = df[\"sales\"] / df[\"sales\"].shift(1) - 1\nprint(\"\\n=== 环比增长 ===\")\nprint(df[[\"sales\", \"month_over_month\"]].tail())\n\n# 基于Z-score的异常检测\ndf[\"z_score\"] = (df[\"sales\"] - df[\"sales\"].mean()) / df[\"sales\"].std()\ndf[\"is_outlier\"] = abs(df[\"z_score\"]) > 3\nprint(f\"\\n异常点数量: {df[\"is_outlier\"].sum()}\")\nprint(\"异常点详情:\")\nprint(df[df[\"is_outlier\"]])\n\n# 节假日对销售的影响\nholiday_sales = df[df[\"is_holiday\"] == 1][\"sales\"].mean()\nnon_holiday_sales = df[df[\"is_holiday\"] == 0][\"sales\"].mean()\npull_factor = holiday_sales / non_holiday_sales\nprint(f\"\\n节假日平均销售额: {holiday_sales:.2f}\")\nprint(f\"非节假日平均销售额: {non_holiday_sales:.2f}\")\nprint(f\"节假日拉动系数: {pull_factor:.2f}\")',
       answerExplanation: '**解题思路：**\n\n1. **数据预处理**：将日期列转换为datetime格式并设置为索引\n2. **重采样**：使用resample(\'W\')按周汇总销售数据\n3. **移动平均**：使用rolling(window=7)计算7日移动平均\n4. **环比计算**：使用shift(1)获取前一天数据进行比较\n5. **异常检测**：基于Z-score识别异常点（超出3倍标准差）\n6. **节假日分析**：比较节假日与非节假日的销售额差异\n\n**关键要点：**\n- resample() 用于时间序列重采样\n- rolling() 用于滑动窗口计算\n- shift() 用于获取前移/后移数据\n- Z-score = (x - mean) / std，用于异常检测'
     },
@@ -169,7 +169,7 @@ const Projects = () => {
       dataFile: 'user_events.csv',
       icon: <FileText className="w-8 h-8" />,
       level: 'intermediate',
-      defaultCode: '# 用户留存与漏斗分析\nimport pandas as pd\nimport numpy as np\n\ndf = load_user_events()\nprint("数据加载成功！")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 用户留存与漏斗分析 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载用户事件数据\ndf = load_user_events()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\n# 数据预处理\ndf[\"date\"] = pd.to_datetime(df[\"date\"])\n\n# 获取用户首次注册日期\nuser_first_signup = df[df[\"event_type\"] == \"signup\"].groupby(\"user_id\")[\"date\"].min().reset_index()\nuser_first_signup.columns = [\"user_id\", \"signup_date\"]\n\ndf = df.merge(user_first_signup, on=\"user_id\", how=\"left\")\ndf[\"days_since_signup\"] = (df[\"date\"] - df[\"signup_date\"]).dt.days\n\n# 计算每日活跃用户\ndaily_active = df[df[\"event_type\"] != \"signup\"].groupby([\"signup_date\", \"days_since_signup\"])[\"user_id\"].nunique().reset_index()\ndaily_active.columns = [\"signup_date\", \"days_since_signup\", \"active_users\"]\n\n# 计算注册用户数\nsignup_counts = df[df[\"event_type\"] == \"signup\"].groupby(\"signup_date\")[\"user_id\"].nunique().reset_index()\nsignup_counts.columns = [\"signup_date\", \"total_signups\"]\n\n# 计算留存率\nretention = daily_active.merge(signup_counts, on=\"signup_date\", how=\"left\")\nretention[\"retention_rate\"] = retention[\"active_users\"] / retention[\"total_signups\"]\n\nretention_matrix = retention.pivot(index=\"signup_date\", columns=\"days_since_signup\", values=\"retention_rate\")\nprint(\"\\n=== 第1、3、7日留存率 ===\")\nprint(f\"第1日留存率: {retention_matrix[1].mean():.2%}\")\nprint(f\"第3日留存率: {retention_matrix[3].mean():.2%}\")\nprint(f\"第7日留存率: {retention_matrix[7].mean():.2%}\")\n\n# 漏斗分析\nevent_order = [\"signup\", \"login\", \"add_to_cart\", \"purchase\"]\nfunnel_data = df.groupby(\"event_type\")[\"user_id\"].nunique().reset_index()\nfunnel_data.columns = [\"event_type\", \"user_count\"]\nfunnel_data = funnel_data[funnel_data[\"event_type\"].isin(event_order)]\nfunnel_data[\"event_order\"] = funnel_data[\"event_type\"].map({event: i for i, event in enumerate(event_order)})\nfunnel_data = funnel_data.sort_values(\"event_order\").drop(\"event_order\", axis=1)\nfunnel_data[\"conversion_rate\"] = funnel_data[\"user_count\"] / funnel_data[\"user_count\"].iloc[0]\n\nprint(\"\\n=== 漏斗分析 ===\")\nprint(funnel_data)',
       answerExplanation: '**解题思路：**\n\n1. **同期群分析**：按用户首次注册日期分组，追踪不同批次用户的留存情况\n2. **留存率计算**：计算第1、3、7日留存率\n3. **漏斗分析**：分析注册→登录→加购→支付的转化漏斗\n\n**关键要点：**\n- groupby().min() 用于获取用户首次注册日期\n- pivot() 用于生成留存率矩阵\n- 漏斗分析需要按事件顺序排列'
     },
@@ -188,7 +188,7 @@ const Projects = () => {
       dataFile: 'ab_test.csv',
       icon: <Brain className="w-8 h-8" />,
       level: 'advanced',
-      defaultCode: '# A/B测试结果分析\nimport pandas as pd\nimport numpy as np\nfrom scipy.stats import chi2_contingency\n\ndf = load_ab_test()\nprint("数据加载成功！")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# A/B测试结果分析 - 完整答案\nimport pandas as pd\nimport numpy as np\nfrom scipy.stats import chi2_contingency\n\n# 加载A/B测试数据\ndf = load_ab_test()\n\nprint(\"=== 分组统计 ===\")\nab_stats = df.groupby(\"group\").agg(\n    total_users=(\"user_id\", \"count\"),\n    converted_users=(\"converted\", \"sum\"),\n    conversion_rate=(\"converted\", \"mean\")\n).reset_index()\nprint(ab_stats)\n\n# 计算转化率差异\ntest_group = ab_stats[ab_stats[\"group\"] == \"test\"]\ncontrol_group = ab_stats[ab_stats[\"group\"] == \"control\"]\n\nconversion_diff = test_group[\"conversion_rate\"].values[0] - control_group[\"conversion_rate\"].values[0]\nrelative_improvement = conversion_diff / control_group[\"conversion_rate\"].values[0]\n\nprint(f\"\\n转化率差异: {conversion_diff:.4f}\")\nprint(f\"相对提升: {relative_improvement:.2%}\")\n\n# 卡方检验\ncontingency_table = pd.crosstab(df[\"group\"], df[\"converted\"])\nchi2, p_value, dof, expected = chi2_contingency(contingency_table)\n\nprint(f\"\\n卡方检验结果:\")\nprint(f\"卡方统计量: {chi2:.4f}\")\nprint(f\"P值: {p_value:.4f}\")\n\n# 结论\nif p_value < 0.05:\n    print(\"\\n结论：实验组转化率显著高于对照组（α=0.05）\")\nelse:\n    print(\"\\n结论：实验组转化率与对照组无显著差异（α=0.05）\")',
       answerExplanation: '**解题思路：**\n\n1. **分组统计**：计算实验组和对照组的转化率\n2. **转化率差异**：计算绝对差异和相对提升\n3. **卡方检验**：检验两组转化率是否存在显著差异\n4. **结论判断**：根据P值判断是否显著（α=0.05）\n\n**关键要点：**\n- 卡方检验适用于分类数据的独立性检验\n- P值 < 0.05 表示结果具有统计学显著性\n- 效应量（如Cramer\'s V）用于衡量差异大小'
     },
@@ -209,7 +209,7 @@ const Projects = () => {
       dataFile: 'user_features.csv',
       icon: <Brain className="w-8 h-8" />,
       level: 'advanced',
-      defaultCode: '# K-Means用户聚类\nimport pandas as pd\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.metrics import silhouette_score\n\ndf = load_user_features()\nprint("数据加载成功！")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# K-Means用户聚类 - 完整答案\nimport pandas as pd\nimport numpy as np\nfrom sklearn.cluster import KMeans\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.metrics import silhouette_score\n\n# 加载用户特征数据\ndf = load_user_features()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\n# 数据标准化\nfeatures = df[[\"total_amount\", \"frequency\", \"recency\", \"avg_order_value\"]]\nscaler = StandardScaler()\nscaled_features = scaler.fit_transform(features)\n\n# 肘部法则确定K值\ninertia = []\nfor k in range(1, 8):\n    kmeans = KMeans(n_clusters=k, random_state=42)\n    kmeans.fit(scaled_features)\n    inertia.append(kmeans.inertia_)\n\nprint(\"\\n=== 肘部法则结果 ===\")\nfor i, val in enumerate(inertia):\n    print(f\"K={i+1}: 惯性={val:.2f}\")\n\n# 选择K=4进行聚类\nk = 4\nkmeans = KMeans(n_clusters=k, random_state=42)\nclusters = kmeans.fit_predict(scaled_features)\ndf[\"cluster\"] = clusters\n\n# 计算轮廓系数\nsilhouette_avg = silhouette_score(scaled_features, clusters)\nprint(f\"\\n轮廓系数: {silhouette_avg:.4f}\")\n\n# 分析聚类特征\ncluster_analysis = df.groupby(\"cluster\").agg({\n    \"total_amount\": \"mean\",\n    \"frequency\": \"mean\",\n    \"recency\": \"mean\",\n    \"avg_order_value\": \"mean\",\n    \"user_id\": \"count\"\n}).reset_index()\n\nprint(\"\\n=== 聚类分析结果 ===\")\nprint(cluster_analysis)',
       answerExplanation: '**解题思路：**\n\n1. **数据标准化**：使用StandardScaler对特征进行标准化处理\n2. **肘部法则**：计算不同K值的惯性，选择肘部点作为最佳K\n3. **K-Means聚类**：使用选定的K值进行聚类\n4. **聚类评估**：使用轮廓系数评估聚类效果\n5. **聚类分析**：分析每个聚类的特征并命名\n\n**关键要点：**\n- 数据标准化是K-Means聚类的必要步骤\n- 肘部法则帮助确定最佳聚类数\n- 轮廓系数范围[-1,1]，越大表示聚类效果越好'
     },
@@ -229,7 +229,7 @@ const Projects = () => {
       dataFile: 'basket_data.csv',
       icon: <BarChart3 className="w-8 h-8" />,
       level: 'intermediate',
-      defaultCode: '# 商品价格带与购物篮大小分析\nimport pandas as pd\nimport numpy as np\n\ndf = load_basket_data()\nprint("数据加载成功！")\nprint(df.head())',
+      defaultCode: '',
       answerCode: '# 商品价格带与购物篮大小分析 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载购物篮数据\ndf = load_basket_data()\n\nprint(\"=== 数据基本信息 ===\")\nprint(df.info())\n\n# 计算购物篮总金额和商品数量\nbasket_analysis = df.groupby(\"order_id\").agg(\n    total_amount=(\"price\", \"sum\"),\n    item_count=(\"quantity\", \"sum\")\n).reset_index()\n\n# 定义购物篮大小\ndef basket_size(row):\n    if row[\"item_count\"] <= 2:\n        return \"小篮（1-2件）\"\n    elif row[\"item_count\"] <= 5:\n        return \"中篮（3-5件）\"\n    else:\n        return \"大篮（6件以上）\"\n\nbasket_analysis[\"basket_size\"] = basket_analysis.apply(basket_size, axis=1)\n\n# 分析不同购物篮大小\nbasket_size_analysis = basket_analysis.groupby(\"basket_size\").agg(\n    order_count=(\"order_id\", \"count\"),\n    avg_total_amount=(\"total_amount\", \"mean\"),\n    avg_item_count=(\"item_count\", \"mean\")\n).reset_index()\n\nprint(\"\\n=== 购物篮大小分析 ===\")\nprint(basket_size_analysis)\n\n# 价格带分析\ndf[\"price_band\"] = pd.qcut(df[\"price\"], 4, labels=[\"低价位\", \"中低价位\", \"中高价位\", \"高价位\"])\n\nprice_band_analysis = df.groupby(\"price_band\").agg(\n    product_count=(\"product_id\", \"count\"),\n    avg_price=(\"price\", \"mean\")\n).reset_index()\n\nprint(\"\\n=== 价格带分析 ===\")\nprint(price_band_analysis)',
       answerExplanation: '**解题思路：**\n\n1. **购物篮分析**：按订单分组，计算每个订单的总金额和商品数量\n2. **购物篮大小分类**：定义小篮（1-2件）、中篮（3-5件）、大篮（6件以上）\n3. **价格带分析**：使用qcut按分位数划分价格带\n4. **交叉分析**：分析不同价格带商品的购买情况\n\n**关键要点：**\n- qcut按分位数划分，确保每个区间样本数量大致相等\n- groupby().agg()用于聚合多个指标\n- 自定义函数配合apply实现复杂分类逻辑'
     },
@@ -251,7 +251,7 @@ const Projects = () => {
       dataFile: 'users.csv, products.csv, reviews.csv, orders.csv',
       icon: <BookOpen className="w-8 h-8" />,
       level: 'advanced',
-      defaultCode: '# 完整数据分析报告 —— 电商综合诊断\nimport pandas as pd\nimport numpy as np\n\n# 加载所有数据\norders = load_orders()\nusers = load_users()\nproducts = load_products()\nreviews = load_reviews()\n\nprint("数据加载完成！")\nprint(f"订单数: {len(orders)}, 用户数: {len(users)}, 商品数: {len(products)}, 评价数: {len(reviews)}")',
+      defaultCode: '',
       answerCode: '# 电商综合诊断 - 完整答案\nimport pandas as pd\nimport numpy as np\n\n# 加载所有数据\norders = load_orders()\nusers = load_users()\nproducts = load_products()\nreviews = load_reviews()\n\nprint(\"=== 数据加载完成 ===\")\nprint(f\"订单数: {len(orders)}\")\nprint(f\"用户数: {len(users)}\")\nprint(f\"商品数: {len(products)}\")\nprint(f\"评价数: {len(reviews)}\")\n\n# 多表合并\norder_product = orders.merge(products, on=\"product_id\", how=\"left\")\norder_product_user = order_product.merge(users, on=\"user_id\", how=\"left\")\n\n# 1. 商品类别复购率分析\nuser_category_purchase = order_product.groupby([\"user_id\", \"category\"]).agg(\n    purchase_count=(\"order_id\", \"count\")\n).reset_index()\n\ncategory_repurchase = user_category_purchase.groupby(\"category\").agg(\n    total_users=(\"user_id\", \"nunique\"),\n    repurchase_users=(\"purchase_count\", lambda x: (x >= 2).sum())\n).reset_index()\n\ncategory_repurchase[\"repurchase_rate\"] = category_repurchase[\"repurchase_users\"] / category_repurchase[\"total_users\"]\ncategory_repurchase = category_repurchase.sort_values(\"repurchase_rate\", ascending=False)\n\nprint(\"\\n=== 商品类别复购率 ===\")\nprint(category_repurchase)\nprint(f\"\\n复购率最高的类别: {category_repurchase.iloc[0][\"category\"]} ({category_repurchase.iloc[0][\"repurchase_rate\"]:.2%})\")\n\n# 2. 时段流失分析\norders[\"order_hour\"] = pd.to_datetime(orders[\"order_date\"]).dt.hour\nuser_order_count = orders.groupby(\"user_id\").agg(\n    order_count=(\"order_id\", \"count\"),\n    first_order_hour=(\"order_hour\", \"first\")\n).reset_index()\n\nchurned_users = user_order_count[user_order_count[\"order_count\"] == 1]\nhourly_churn = churned_users.groupby(\"first_order_hour\")[\"user_id\"].nunique().reset_index()\nhourly_churn.columns = [\"order_hour\", \"churned_users\"]\n\nhourly_users = orders.groupby(\"order_hour\")[\"user_id\"].nunique().reset_index()\nhourly_users.columns = [\"order_hour\", \"total_users\"]\n\nhourly_analysis = hourly_users.merge(hourly_churn, on=\"order_hour\", how=\"left\")\nhourly_analysis[\"churn_rate\"] = hourly_analysis[\"churned_users\"] / hourly_analysis[\"total_users\"]\nhourly_analysis = hourly_analysis.sort_values(\"churn_rate\", ascending=False)\n\nprint(\"\\n=== 时段流失分析 ===\")\nprint(f\"流失最严重的时段: {hourly_analysis.iloc[0][\"order_hour\"]}点 ({hourly_analysis.iloc[0][\"churn_rate\"]:.2%})\")',
       answerExplanation: '**解题思路：**\n\n1. **多表合并**：将订单表、用户表、商品表、评价表合并\n2. **复购率分析**：计算每个商品类别的复购率\n3. **时段流失分析**：分析不同时段下单用户的流失情况\n4. **交叉销售分析**：分析商品关联购买模式\n5. **综合建议**：基于分析结果提出业务建议\n\n**关键要点：**\n- merge()用于多表关联\n- groupby().agg()用于复杂聚合\n- 综合运用前面项目的所有技术'
     }
@@ -425,7 +425,7 @@ const Projects = () => {
 
             <div className="space-y-6">
               <CodeEditor
-                initialCode={showAnswer ? selectedProject.answerCode : selectedProject.defaultCode}
+                initialCode={currentCode || ''}
                 language="python"
                 onRunCode={runCode}
               />
